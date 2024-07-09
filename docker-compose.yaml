@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  createClients:
+    build: ./createClients
+    ports:
+      - "3000:3000"
+
+  createProducts:
+    build: ./createProducts
+    ports:
+      - "3001:3001"
+
+  createSales:
+    build: ./createSales
+    ports:
+      - "3002:3002"
