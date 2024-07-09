@@ -44,6 +44,8 @@ jobs:
           then
             sudo yum update -y
             sudo yum install -y docker
+            sudo yum install libxcrypt-compat
+
           else
             echo "No se pudo detectar el gestor de paquetes."
             exit 1
