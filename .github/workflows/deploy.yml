@@ -61,7 +61,7 @@ jobs:
           fi
 
           # Ejecutar los comandos Docker y Docker Compose
-          docker pull ${{ secrets.DOCKER_USERNAME }}/createclients:latest
-          docker pull ${{ secrets.DOCKER_USERNAME }}/createproducts:latest
-          docker pull ${{ secrets.DOCKER_USERNAME }}/createsales:latest
-          docker-compose up -d
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/createclients:latest
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/createproducts:latest
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/createsales:latest
+          sudo docker-compose up -d
