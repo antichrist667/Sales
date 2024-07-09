@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 3002
 
 # Comando para ejecutar la aplicación
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
