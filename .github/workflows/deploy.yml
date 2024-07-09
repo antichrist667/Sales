@@ -1,69 +1,81 @@
-name: Deploy to EC2
+name: Build and Push Docker Images
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
-  build_and_deploy:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+      
+    - name: Sign in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+    - name: Build and upload Docker images
+      run: |
+        services=("createClients" "createProducts" "createSales")
+        
+        for service in "${services[@]}"
+        do
+          if [ -d "$service" ]; then
+            docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/$service:latest ./$service
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/$service:latest
+          else
+            echo "Could not find directory for service $service"
+            exit 1
+          fi
+        done
+
+    - name: Fix routes in docker-compose.yml
+      run: |
+        sed -i 's|build: \./|build: ../|g' ./docker/docker-compose.yml
+        echo "Updated content from docker-compose.yml:"
+        cat ./docker/docker-compose.yml
+
+    - name: Execute Docker Compose
+      run: |
+        docker-compose -f ./docker/docker-compose.yml up -d
+  deploy-AWS:
+    needs: [build-and-push]  
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-
-    - name: Login to Docker Hub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-    - name: Build and push Docker images
+      
+    - name: Set permissions for private key
       run: |
-        docker buildx build --push --tag ${{ secrets.DOCKER_USERNAME }}/createclients:latest ./createClients
-        docker buildx build --push --tag ${{ secrets.DOCKER_USERNAME }}/createproducts:latest ./createProducts
-        docker buildx build --push --tag ${{ secrets.DOCKER_USERNAME }}/createsales:latest ./createSales
+        echo "${{ secrets.AWS_PRIVATE_KEY }}" > key.pem
+        chmod 600 key.pem
 
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_KEY }}
-        script: |
-          # Detectar el sistema operativo y usar el gestor de paquetes adecuado
-          if command -v apt-get &> /dev/null
-          then
-            sudo apt-get update
-            sudo apt-get install -y docker.io
-          elif command -v yum &> /dev/null
-          then
-            sudo yum update -y
-            sudo yum install -y docker
-            sudo yum install libxcrypt-compat
+    - name: Pull Docker images
+      run: |
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/createClients:latest'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/createProducts:latest'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/createSales:latest'
+        
+        
+    - name: Stop running containers
+      run: |
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker stop createClients-plataform-aws || true'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker rm createClients-plataform-aws || true'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker stop createProducts-plataform-aws || true'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker rm createProducts-plataform-aws || true'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker stop createSales-plataform-aws || true'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker rm createSales-plataform-aws || true'
 
-          else
-            echo "No se pudo detectar el gestor de paquetes."
-            exit 1
-          fi
+    - name: Remove old Docker images
+      run: |
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker image prune -f'
 
-          # Iniciar y habilitar Docker
-          sudo systemctl start docker
-          sudo systemctl enable docker
-
-          # Instalar Docker Compose
-          if ! command -v docker-compose &> /dev/null
-          then
-            sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-          fi
-
-          # Ejecutar los comandos Docker y Docker Compose
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/createclients:latest
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/createproducts:latest
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/createsales:latest
-          sudo docker-compose up -d
+    - name: Run new containers
+      run: |
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker run -d --name createSales-plataform-aws -p 3002:3002 ${{ secrets.DOCKERHUB_USERNAME }}/createSales:latest'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker run -d --name createProducts-plataform-aws -p 3001:3001 ${{ secrets.DOCKERHUB_USERNAME }}/createProducts:latest'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker run -d --name createClients-plataform-aws -p 3000:3000 ${{ secrets.DOCKERHUB_USERNAME }}/createClients:latest'
