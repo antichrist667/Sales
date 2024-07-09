@@ -35,23 +35,32 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          
-          if ! command -v docker &> /dev/null
+          # Detectar el sistema operativo y usar el gestor de paquetes adecuado
+          if command -v apt-get &> /dev/null
           then
             sudo apt-get update
             sudo apt-get install -y docker.io
-            sudo systemctl start docker
-            sudo systemctl enable docker
+          elif command -v yum &> /dev/null
+          then
+            sudo yum update -y
+            sudo yum install -y docker
+          else
+            echo "No se pudo detectar el gestor de paquetes."
+            exit 1
           fi
 
-          
+          # Iniciar y habilitar Docker
+          sudo systemctl start docker
+          sudo systemctl enable docker
+
+          # Instalar Docker Compose
           if ! command -v docker-compose &> /dev/null
           then
             sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
             sudo chmod +x /usr/local/bin/docker-compose
           fi
 
-          
+          # Ejecutar los comandos Docker y Docker Compose
           docker pull ${{ secrets.DOCKER_USERNAME }}/createclients:latest
           docker pull ${{ secrets.DOCKER_USERNAME }}/createproducts:latest
           docker pull ${{ secrets.DOCKER_USERNAME }}/createsales:latest
