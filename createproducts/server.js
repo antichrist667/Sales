@@ -10,12 +10,12 @@ let products = [
     { id: 2, name: 'Producto 2' }
 ];
 
-// Endpoint para obtener todos los productos
+
 app.get('/products', (req, res) => {
     res.json(products);
 });
 
-// Endpoint para agregar un nuevo producto
+
 app.post('/products', (req, res) => {
     const newProduct = {
         id: products.length + 1,
