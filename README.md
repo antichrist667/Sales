@@ -58,7 +58,7 @@ Below is an example of how you can instruct your audience on installing and sett
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/antichrist667/multirepo.git
+   git clone https://github.com/antichrist667/sales.git
    ```
 2. Install NPM packages
    ```sh
@@ -80,89 +80,94 @@ http://localhost:3002/sales
 ```
 2. Get all clients
 
+```sh
 GET /clients
+```
 
 Response:
-
+```sh
 [
-    { "id": 1, "name": "Cristian" },
-    { "id": 2, "name": "Roberto" }
+  { "id": 1, "name": "Cristian" },
+  { "id": 2, "name": "Roberto" }
 ]
-
+```
 Add a new client
+```sh
 POST /clients
-
+```
 Request body:
+```sh
 {
     "name": "New Client"
 }
-
+```
 Response:
+```sh
 {
     "id": 3,
     "name": "New Client"
 }
-
+```
 Sales
-
+```sh
 Get all sales
 
 GET /sales
-
+```
 Response:
-
+```sh
 [
     { "id": 1, "totalPrice": 100.0 },
     { "id": 2, "totalPrice": 200.0 }
 ]
-
+```
 Add a new sale
-
+```sh
 POST /sales
-
+```
 Request body:
-
+```sh
 {
     "totalPrice": 150.0
 }
-
+```
 Response:
-
+```sh
 {
     "id": 3,
     "totalPrice": 150.0
 }
-
+```
 Products
-
+```sh
 Get all products
 
 GET /products
-
+```
 Response:
-
+```sh
 [
     { "id": 1, "name": "Producto 1" },
     { "id": 2, "name": "Producto 2" }
 ]
-
+```
 Add a new product
-
+```sh
 POST /products
-
+```
 Request body:
-
+```sh
 {
     "name": "New Product"
 }
-
+```
 Response:
-
+```sh
 {
     "id": 3,
     "name": "New Product"
 }
-
+```
 ## 🚀 Deployment <a name = "deployment"></a>
 
 ### Additional Notes for Deployment on a Live System
