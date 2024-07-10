@@ -7,10 +7,9 @@
 
 <div align="center">
 
-[![Express][Express]][Express-url]()
+[![Express][Express]][Express-url]
 [![JavaScript][JavaScript]][JavaScript-url]
-[![Docker Hub][DockerHub-logo]][DockerHub-url]
-[![AWS][AWS-logo]][AWS-url]
+
 
 
 </div>
@@ -219,3 +218,4 @@ By following these steps, the deployment process ensures that the latest version
 [Axios-url]: https://reactjs.org/
 [JavaScript]: https://img.shields.io/badge/logo-javascript-blue?logo=javascript
 [JavaScript-url]: https://developer.mozilla.org/es/docs/Learn/JavaScript/First_steps/What_is_JavaScript
+[AWS Services]:(https://img.shields.io/badge/AWS_Services-%231e77b4?style=for-the-badge&logo=amazon-aws&logoColor=white)
