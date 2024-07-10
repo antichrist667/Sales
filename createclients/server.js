@@ -10,12 +10,12 @@ let clients = [
     { id: 2, name: 'Roberto' }
 ];
 
-// Endpoint para obtener todos los clientes
+
 app.get('/clients', (req, res) => {
     res.json(clients);
 });
 
-// Endpoint para agregar un nuevo cliente
+
 app.post('/clients', (req, res) => {
     const newClient = {
         id: clients.length + 1,

@@ -10,12 +10,12 @@ let sales = [
     { id: 2, totalPrice: 200.0 }
 ];
 
-// Endpoint para obtener todas las ventas
+
 app.get('/sales', (req, res) => {
     res.json(sales);
 });
 
-// Endpoint para agregar una nueva venta
+
 app.post('/sales', (req, res) => {
     const newSale = {
         id: sales.length + 1,
