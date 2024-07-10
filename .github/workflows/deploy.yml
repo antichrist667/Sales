@@ -21,7 +21,7 @@ jobs:
         
     - name: Build and upload Docker images
       run: |
-        services=("createClients" "createProducts" "createSales")
+        services=("createclients" "createproducts" "createsales")
         
         for service in "${services[@]}"
         do
@@ -56,19 +56,19 @@ jobs:
 
     - name: Pull Docker images
       run: |
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/createClients:latest'
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/createProducts:latest'
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/createSales:latest'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/createclients:latest'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/createproducts:latest'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/createsales:latest'
         
         
     - name: Stop running containers
       run: |
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker stop createClients-plataform-aws || true'
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker rm createClients-plataform-aws || true'
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker stop createProducts-plataform-aws || true'
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker rm createProducts-plataform-aws || true'
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker stop createSales-plataform-aws || true'
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker rm createSales-plataform-aws || true'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker stop createclients-plataform-aws || true'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker rm createclients-plataform-aws || true'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker stop createproducts-plataform-aws || true'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker rm createproducts-plataform-aws || true'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker stop createsales-plataform-aws || true'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker rm createsales-plataform-aws || true'
 
     - name: Remove old Docker images
       run: |
@@ -76,6 +76,6 @@ jobs:
 
     - name: Run new containers
       run: |
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker run -d --name createSales-plataform-aws -p 3002:3002 ${{ secrets.DOCKERHUB_USERNAME }}/createSales:latest'
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker run -d --name createProducts-plataform-aws -p 3001:3001 ${{ secrets.DOCKERHUB_USERNAME }}/createProducts:latest'
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker run -d --name createClients-plataform-aws -p 3000:3000 ${{ secrets.DOCKERHUB_USERNAME }}/createClients:latest'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker run -d --name createsales-plataform-aws -p 3002:3002 ${{ secrets.DOCKERHUB_USERNAME }}/createsales:latest'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker run -d --name createproducts-plataform-aws -p 3001:3001 ${{ secrets.DOCKERHUB_USERNAME }}/createproducts:latest'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} 'sudo docker run -d --name createclients-plataform-aws -p 3000:3000 ${{ secrets.DOCKERHUB_USERNAME }}/createclients:latest'
